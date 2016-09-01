@@ -1,0 +1,23 @@
+<?php 
+function bemy_menu(){
+    $items['admin/config/bemy'] = array(
+        'title' => t('Bemy Custom Settings'),
+        'description' => t('Bemy Custom Settings'),
+        'position' => 'right',
+        'weight' => 1,
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('bemy_admin'),
+        'access arguments' => array(true),
+        'file' => 'bemy.form.inc',
+    );
+
+    $items['admin/config/bemy/settings'] = array(
+        'title' => t('Configurations page'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('bemy_admin'),
+        'file' => 'bemy.form.inc',
+        'access arguments' => array(true),
+    );
+    return $items;
+}
+?>

@@ -1,0 +1,10 @@
+name = Bemy
+description = Bemy Custom Module developed for Bemy Site.
+package = Bemy custom modules
+version = VERSION
+core = 7.x
+
+files[] = bemy.module
+
+
+author = Rajan Gurung
