@@ -768,7 +768,7 @@ body.front #views-slideshow-bxslider-images-2 .bxslider-views-slideshow-main-fra
 .node-type-email-for-download .music-text-header .music-text:before {
     position: absolute;
     
-    right: 47.28%;
+    right: 47.29%;
     content: "";
     display: block;
     width: 0;
@@ -788,6 +788,19 @@ body.front #views-slideshow-bxslider-images-2 .bxslider-views-slideshow-main-fra
 }
 .node-type-digital-license-product audio {
     width: 50px;
+}
+.node-type-product-item .group-footer {
+    padding-top: 30px;
+}
+.node-type-product-item .commerce-product-field.commerce-product-field-field-product-features.field-field-product-features {
+    width: 50%;
+    float: left;
+}
+.node-type-product-item .cloud-zoom-gallery-thumbs > a {
+    width: 100%;
+}
+div#block-webform-client-block-59 {
+    padding-top: 30px;
 }
 /* end of sep 12 changes */
 .page-merch-listing-page .music-text-header .merch-text:before {
