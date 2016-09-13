@@ -55,7 +55,7 @@ function bemy_admin()
         '#upload_location' => 'public://banner/',
     );
 
-    $form['bemybannerinfo']['artist_inner_image'] = array(
+    /*$form['bemybannerinfo']['artist_inner_image'] = array(
         '#type' => 'managed_file',
         '#id' => 'file4',
         '#title' => t('Please add artist inner page banner image.'),
@@ -64,7 +64,7 @@ function bemy_admin()
         '#description' => t(""),
         '#upload_validators' => array('file_validate_extensions' => array('gif png jpg jpeg')),
         '#upload_location' => 'public://banner/',
-    );
+    );*/
 
     // Perform our custom submit before system submit
     $form['#submit'][] = 'bemy_admin_submit';
@@ -91,7 +91,7 @@ function bemy_admin_submit($form, &$form_state)
     file_save_permanent($form_state,'music_image','music_image_fid');
     file_save_permanent($form_state,'merch_image','merch_image_fid');
     file_save_permanent($form_state,'artist_image','artist_image_fid');
-    file_save_permanent($form_state,'artist_inner_image','artist_inner_image_fid');
+    //file_save_permanent($form_state,'artist_inner_image','artist_inner_image_fid');
 }
 
 function file_save_permanent($form_state,$name_key,$name_key_fid){

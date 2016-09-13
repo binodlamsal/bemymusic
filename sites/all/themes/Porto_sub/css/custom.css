@@ -23,7 +23,7 @@ ul#mainMenu {
     float: left;
 }
 #header .header-nav-main nav > ul > li > a {
-	font-size: 14px;
+    font-size: 14px;
 }
 li a.active {
     color: #0088cc;
@@ -173,19 +173,34 @@ ul.custom-cart-menu li {
 div#drop-down-cart-wrapper {
     float: right;
 }
-.custom-cart {
+#drop-down-cart-wrapper .cart.button{
     background: #fff url("../images/Cartbuttonicon.jpg") no-repeat scroll;
+    z-index: 1000;
+    /* border-radius: 0 0 0 7px; */
+    border-color: gold #0088cc #0088cc;
+    display: block;
+    font-size: 0.929em;
+    font-weight: bold;
+    height: 50px;
+    /* padding: 5px 10px; */
+    position: relative;
+    text-decoration: none;
+    text-transform: uppercase;
+    width: 77px;
+}
+.custom-cart {
+    /*background: #fff url("../images/Cartbuttonicon.jpg") no-repeat scroll;*/
     color: #3a358f;
     display: block;
     font-size: 0.929em;
     font-weight: bold;
     height: 50px;
     line-height: 14px;
-    padding: 5px 10px;
+    /*padding: 5px 10px;*/
     text-decoration: none;
     text-transform: uppercase;
     width: 77px;
-    margin-right: 2px;
+    /*margin-right: 2px;*/
     border-radius: 0 0 7px 0;
 }
 .hello-admin a {
@@ -382,9 +397,9 @@ span.vd-about {
     padding-top: 20px;
 }
 @media screen and (min-width: 992px){
-	#header .header-nav.header-nav-push-top {
+    #header .header-nav.header-nav-push-top {
         margin-top: -75px;
-	}
+    }
 
 }
 
@@ -449,14 +464,16 @@ span.vd-about {
     background: #fff;
     border: #ddd 1px solid;
     right: 0;
-    top: 50px;
+    /*top: 50px;*/
     box-shadow: 2px 2px 10px #c8c8c8;
     -o-border-radius: 10px;
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
     border-radius: 10px;
 }
-
+div#block-webform-client-block-59 {
+    width: 50%;
+}
 ul.custom-cart-menu li a {
     color: black;
 }
@@ -653,6 +670,7 @@ body.front #views-slideshow-bxslider-images-2 .bxslider-views-slideshow-main-fra
     padding-right: 8%;
     text-align: right;
 }
+
 .music-text-header .music-text a,
 .music-text-header .music-text a:hover,
 .music-text-header .music-text a:focus {
@@ -684,7 +702,20 @@ body.front #views-slideshow-bxslider-images-2 .bxslider-views-slideshow-main-fra
 .page-music .music-text-header .music-text a:focus {
  color: #000000;   
 }
-.page-merch-listing-page .music-text-header .merch-text:before {
+/*sep 12 changes */
+.node-type-email-for-download .music-text-header .merch-text {
+    padding-left: 8%;
+}
+.node-type-email-for-download .music-text-header .music-text {
+    background: #ffffff;
+    color: #000000;
+}
+.node-type-product-item .merch-text {
+    padding-left: 4%;
+    background: #ffffff;
+    color: #000000;
+}
+.node-type-product-item .merch-text:before {
     position: absolute;
     top: 0px;
     left: -50px;
@@ -696,9 +727,85 @@ body.front #views-slideshow-bxslider-images-2 .bxslider-views-slideshow-main-fra
     border-bottom: 50px solid transparent;
     border-right: 50px solid #ffffff;
 }
+.node-type-digital-license-product-album .merch-text {
+    padding-left: 8%;
+}
+.node-type-digital-license-product .merch-text {
+    padding-left: 8%;
+}
+.node-type-digital-license-product-album .music-text-header .music-text {
+    background: #ffffff;
+    color: #000000;
+}
+.node-type-digital-license-product .music-text-header .music-text {
+    background: #ffffff;
+    color: #000000;
+}
+.node-type-digital-license-product-album .music-text:before {
+    position: absolute;
+    
+    left: 50%;
+    content: "";
+    display: block;
+    width: 0;
+    height: 0;
+    border-top: 65px solid transparent;
+    border-bottom: 50px solid transparent;
+    border-left: 50px solid #ffffff;
+}
+.node-type-digital-license-product .music-text:before {
+    position: absolute;
+    
+    left: 50%;
+    content: "";
+    display: block;
+    width: 0;
+    height: 0;
+    border-top: 65px solid transparent;
+    border-bottom: 50px solid transparent;
+    border-left: 50px solid #ffffff;
+}
+.node-type-email-for-download .music-text-header .music-text:before {
+    position: absolute;
+    
+    right: 47.28%;
+    content: "";
+    display: block;
+    width: 0;
+    height: 0;
+    border-top: 65px solid transparent;
+    border-bottom: 50px solid transparent;
+    border-left: 50px solid #ffffff;
+}
+.node-type-artist-page audio {
+    width: 50px;
+}
+.node-type-digital-license-product-album audio {
+    width: 50px;
+}
+.view-id-event_individual_page.view-display-id-block_1{
+    padding-top: 15px;
+}
+.node-type-digital-license-product audio {
+    width: 50px;
+}
+/* end of sep 12 changes */
+.page-merch-listing-page .music-text-header .merch-text:before {
+    position: absolute;
+    top: 0px !important;
+    left: -50px;
+    content: "";
+    display: block;
+    width: 0;
+    height: 0;
+    border-top: 65px solid transparent;
+    border-bottom: 50px solid transparent;
+    border-right: 50px solid #ffffff;
+}
+
 .page-music .music-text-header .music-text:before {
     position: absolute;
-    top: 0px;
+    top: 0px !important;
     right: -50px;
     content: "";
     display: block;
@@ -757,6 +864,10 @@ body:not(.front) .bxslider-views-slideshow-main-frame-row .views-field-title a:f
 }
 
 /* Merch lisging page */
+
+.page-merch-listing-page .panel-col-first.panel-panel #views-exposed-form-merch-listing-page-panel-pane-1 .form-item-title {
+    display: none;
+}
 
 [class*="listing-page"] > .view-content {
     margin: 0 -15px;
@@ -827,7 +938,7 @@ body:not(.front) [class*=listing-page] .views-row .views-field-field-product-ima
     left: 0;
     bottom: 0;
     opacity: 0;
-    z-index: 1;
+    z-index: 0;
     content: "";
     background: rgba(0, 0, 0, 0.60);
     width: 100%;
@@ -1070,7 +1181,37 @@ span.cus-search-icon {
     width: 50%;
 }
 
-
+    .node-type-product-item .inner-music-text a, a:hover {
+    color: #000 ;
+    }
+    
+    .node-type-digital-license-product .apparel-text a{
+        color: #000 ;
+    }
+    .node-type-digital-license-product-album .apparel-text a{
+        color: #000 ;
+    }
+    .node-type-email-for-download .apparel-text a{
+        color: #000 ;
+    }
+    .node-type-digital-license-product .apparel-text a:hover{
+        color: #000 ;
+    }
+    .node-type-digital-license-product-album .apparel-text a:hover{
+        color: #000 ;
+    }
+    .node-type-email-for-download .apparel-text a:hover{
+        color: #000 ;
+    }
+    .node-type-digital-license-product .apparel-text a:focus{
+        color: #000 ;
+    }
+    .node-type-digital-license-product-album .apparel-text a:focus{
+        color: #000 ;
+    }
+    .node-type-email-for-download .apparel-text a:focus{
+        color: #000 ;
+    }
 .node-type-digital-license-product .group-footer:before,
 .node-type-digital-license-product .group-footer:after {
     content: "";
@@ -1244,7 +1385,9 @@ body.page-artist .panel-2col-stacked .panel-col-last {
 }
 
 /* Defining style rules for video page */
-
+.panel-panel.panel-col-last .view-display-id-block_3 {
+    padding-top: 40px;
+}
 .page-video .panel-display {
     margin: 0 -10%;
 }
@@ -1607,6 +1750,15 @@ html .btn:focus {
 }
 
 @media (max-width: 767px) {
+    .page-video .panel-display div.panel-col-first .view-content, .pane-node-video-page .view-header {
+        position: relative;
+        overflow: hidden;
+        padding-bottom: 0% !important; 
+        height: 100%;
+    }
+    .page-video .panel-display div.panel-col-first .view-content {
+        padding-bottom: 56.25% !important
+    }
     .region-content {
         text-align: center;
     }
@@ -1630,6 +1782,38 @@ html .btn:focus {
         vertical-align: middle;
         float: none !important;
     }
+    .node-type-product-item .inner-music-text a, a:hover {
+    color: #000 ;
+    }
+    
+    .node-type-digital-license-product .apparel-text a{
+        color: #000 ;
+    }
+    .node-type-digital-license-product-album .apparel-text a{
+        color: #000 ;
+    }
+    .node-type-email-for-download .apparel-text a{
+        color: #000 ;
+    }
+    .node-type-digital-license-product .apparel-text a:hover{
+        color: #000 ;
+    }
+    .node-type-digital-license-product-album .apparel-text a:hover{
+        color: #000 ;
+    }
+    .node-type-email-for-download .apparel-text a:hover{
+        color: #000 ;
+    }
+    .node-type-digital-license-product .apparel-text a:focus{
+        color: #000 ;
+    }
+    .node-type-digital-license-product-album .apparel-text a:focus{
+        color: #000 ;
+    }
+    .node-type-email-for-download .apparel-text a:focus{
+        color: #000 ;
+    }
+
     .node-type-digital-license-product .inner-music-text-header .inner-music-text:after {
         right: 93px;
         bottom: -28px;
@@ -1678,7 +1862,7 @@ html .btn:focus {
     .view-id-home_page_video div#mediafront_home_page_video_1 {
         z-index: 0 !important;
     }
-    .minplayer-default {
+    body.front .minplayer-default {
         z-index: -1 !important;
     }
     #header .header-logo img {
@@ -1733,8 +1917,14 @@ html .btn:focus {
         background-size: 50%;
         height: 30px;
     }
+    #drop-down-cart-wrapper .cart.button{ 
+         background: #ececec url("../images/Cartbuttonicon.jpg") no-repeat scroll 0 0; 
+         background-size: 50%; 
+         height: 30px; 
+    }
     .custom-cart span {
         font-size: 10px;
+        margin-right: 40px;
     }
     .custom-cart {
         background: #ececec url("../images/Cartbuttonicon.jpg") no-repeat scroll;

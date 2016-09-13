@@ -1,16 +1,20 @@
 <?php
 	
 function Porto_sub_link(array $variables) {
+  
+  
 
+  
   global $user;
-  $path = $variables['path'];
+  $path = $variables['text'];
 
-  if($path == 'cart') {
-  	// echo "<pre>";
-  	// print_r($variables);
-  	// exit;
-	
+  
+if($path == 'Item') {
+    
+  // echo "<pre>";
+  // print_r($variables);
     if($order = commerce_cart_order_load($user->uid)) {
+
       // Count the number of product line items on the order.
       $wrapper = entity_metadata_wrapper('commerce_order', $order);
       $quantity = commerce_line_items_quantity($wrapper->commerce_line_items, commerce_product_line_item_types());
@@ -20,7 +24,37 @@ function Porto_sub_link(array $variables) {
       // we MUST do our own filtering of the original text with check_plain(),
       // then specify that the link text has HTML content.
       if (!isset($variables['options']['html']) || empty($variables['options']['html'])) {
-        $variables['text'] =  'Cart ( ' .$quantity. ' )';
+        if($quantity == 0 || $quantity == 1 || $quantity == NULL){
+          $variables['text'] =  'Item (' .$quantity. ')';
+        }else{
+          $variables['text'] =  'Items (' .$quantity. ')';
+        }
+        
+        $variables['options']['html'] = TRUE;
+        // $variables['options']['attributes']['class'][] = 'custom-cart';
+      }
+  }
+}
+if($path == 'Price') {
+  
+   
+    
+  // echo "<pre>";
+  // print_r($variables);
+    if($order = commerce_cart_order_load($user->uid)) {
+      $wrapper = entity_metadata_wrapper('commerce_order', $order);
+      $order_total = $wrapper->commerce_order_total->value();
+      $total =  commerce_currency_format($order_total['amount'],                  $order_total['currency_code']);            
+      // Count the number of product line items on the order.
+      //$wrapper = entity_metadata_wrapper('commerce_order', $order);
+      //$quantity = commerce_line_items_quantity($wrapper->commerce_line_items, commerce_product_line_item_types());
+
+      // We're injecting custom HTML into the link text, so if the original
+      // link text was not set to allow HTML (the usual case for menu items),
+      // we MUST do our own filtering of the original text with check_plain(),
+      // then specify that the link text has HTML content.
+      if (!isset($variables['options']['html']) || empty($variables['options']['html'])) {
+        $variables['text'] =  'Price (' .$total. ')';
         $variables['options']['html'] = TRUE;
         // $variables['options']['attributes']['class'][] = 'custom-cart';
       }
@@ -31,6 +65,8 @@ function Porto_sub_link(array $variables) {
 }
 
 
+
+
 function Porto_sub_views_pre_render(&$view) {
 
   /*if ($view->name == 'music_album_features' ) {
@@ -39,7 +75,11 @@ function Porto_sub_views_pre_render(&$view) {
       $view->set_title('my new title');
   }*/
 }
-
+function Porto_sub_preprocess_page(&$vars) {
+    if(arg(0) == 'music'){
+      drupal_set_title('Music');
+    }
+}
 ?>
 
 

@@ -1,0 +1,202 @@
+/**
+ * @file
+ * Attaches the behaviors for the Overlay child pages.
+ */
+
+(function ($) {
+
+/**
+ * Attach the child dialog behavior to new content.
+ */
+Drupal.behaviors.overlayChild = {
+  attach: function (context, settings) {
+    // Make sure this behavior is not processed more than once.
+    if (this.processed) {
+      return;
+    }
+    this.processed = true;
+
+    // If we cannot reach the parent window, break out of the overlay.
+    if (!parent.Drupal || !parent.Drupal.overlay) {
+      window.location = window.location.href.replace(/([?&]?)render=overlay&?/g, '$1').replace(/\?$/, '');
+    }
+
+    var settings = settings.overlayChild || {};
+
+    // If the entire parent window should be refreshed when the overlay is
+    // closed, pass that information to the parent window.
+    if (settings.refreshPage) {
+      parent.Drupal.overlay.refreshPage = true;
+    }
+
+    // If a form has been submitted successfully, then the server side script
+    // may have decided to tell the parent window to close the popup dialog.
+    if (settings.closeOverlay) {
+      parent.Drupal.overlay.bindChild(window, true);
+      // Use setTimeout to close the child window from a separate thread,
+      // because the current one is busy processing Drupal behaviors.
+      setTimeout(function () {
+        if (typeof settings.redirect == 'string') {
+          parent.Drupal.overlay.redirect(settings.redirect);
+        }
+        else {
+          parent.Drupal.overlay.close();
+        }
+      }, 1);
+      return;
+    }
+
+    // If one of the regions displaying outside the overlay needs to be
+    // reloaded immediately, let the parent window know.
+    if (settings.refreshRegions) {
+      parent.Drupal.overlay.refreshRegions(settings.refreshRegions);
+    }
+
+    // Ok, now we can tell the parent window we're ready.
+    parent.Drupal.overlay.bindChild(window);
+
+    // IE8 crashes on certain pages if this isn't called; reason unknown.
+    window.scrollTo(window.scrollX, window.scrollY);
+
+    // Attach child related behaviors to the iframe document.
+    Drupal.overlayChild.attachBehaviors(context, settings);
+
+    // There are two links within the message that informs people about the
+    // overlay and how to disable it. Make sure both links are visible when
+    // either one has focus and add a class to the wrapper for styling purposes.
+    $('#overlay-disable-message', context)
+      .focusin(function () {
+        $(this).addClass('overlay-disable-message-focused');
+        $('a.element-focusable', this).removeClass('element-invisible');
+      })
+      .focusout(function () {
+        $(this).removeClass('overlay-disable-message-focused');
+        $('a.element-focusable', this).addClass('element-invisible');
+      });
+  }
+};
+
+/**
+ * Overlay object for child windows.
+ */
+Drupal.overlayChild = Drupal.overlayChild || {
+  behaviors: {}
+};
+
+Drupal.overlayChild.prototype = {};
+
+/**
+ * Attach child related behaviors to the iframe document.
+ */
+Drupal.overlayChild.attachBehaviors = function (context, settings) {
+  $.each(this.behaviors, function () {
+    this(context, settings);
+  });
+};
+
+/**
+ * Capture and handle clicks.
+ *
+ * Instead of binding a click event handler to every link we bind one to the
+ * document and handle events that bubble up. This also allows other scripts
+ * to bind their own handlers to links and also to prevent overlay's handling.
+ */
+Drupal.overlayChild.behaviors.addClickHandler = function (context, settings) {
+  $(document).bind('click.drupal-overlay mouseup.drupal-overlay', $.proxy(parent.Drupal.overlay, 'eventhandlerOverrideLink'));
+};
+
+/**
+ * Modify forms depending on their relation to the overlay.
+ *
+ * By default, forms are assumed to keep the flow in the overlay. Thus their
+ * action attribute get a ?render=overlay suffix.
+ */
+Drupal.overlayChild.behaviors.parseForms = function (context, settings) {
+  $('form', context).once('overlay', function () {
+    // Obtain the action attribute of the form.
+    var action = $(this).attr('action');
+    // Keep internal forms in the overlay.
+    if (action == undefined || (action.indexOf('http') != 0 && action.indexOf('https') != 0)) {
+      action += (action.indexOf('?') > -1 ? '&' : '?') + 'render=overlay';
+      $(this).attr('action', action);
+    }
+    // Submit external forms into a new window.
+    else {
+      $(this).attr('target', '_new');
+    }
+  });
+};
+
+/**
+ * Replace the overlay title with a message while loading another page.
+ */
+Drupal.overlayChild.behaviors.loading = function (context, settings) {
+  var $title;
+  var text = Drupal.t('Loading');
+  var dots = '';
+
+  $(document).bind('drupalOverlayBeforeLoad.drupal-overlay.drupal-overlay-child-loading', function () {
+    $title = $('#overlay-title').text(text);
+    var id = setInterval(function () {
+      dots = (dots.length > 10) ? '' : dots + '.';
+      $title.text(text + dots);
+    }, 500);
+  });
+};
+
+/**
+ * Switch active tab immediately.
+ */
+Drupal.overlayChild.behaviors.tabs = function (context, settings) {
+  var $tabsLinks = $('#overlay-tabs > li > a');
+
+  $('#overlay-tabs > li > a').bind('click.drupal-overlay', function () {
+    var active_tab = Drupal.t('(active tab)');
+    $tabsLinks.parent().siblings().removeClass('active').find('element-invisible:contains(' + active_tab + ')').appendTo(this);
+    $(this).parent().addClass('active');
+  });
+};
+
+/**
+ * If the shortcut add/delete button exists, move it to the overlay titlebar.
+ */
+Drupal.overlayChild.behaviors.shortcutAddLink = function (context, settings) {
+  // Remove any existing shortcut button markup from the titlebar.
+  $('#overlay-titlebar').find('.add-or-remove-shortcuts').remove();
+  // If the shortcut add/delete button exists, move it to the titlebar.
+  var $addToShortcuts = $('.add-or-remove-shortcuts');
+  if ($addToShortcuts.length) {
+    $addToShortcuts.insertAfter('#overlay-title');
+  }
+
+  $(document).bind('drupalOverlayBeforeLoad.drupal-overlay.drupal-overlay-child-loading', function () {
+    $('#overlay-titlebar').find('.add-or-remove-shortcuts').remove();
+  });
+};
+
+/**
+ * Use displacement from parent window.
+ */
+Drupal.overlayChild.behaviors.alterTableHeaderOffset = function (context, settings) {
+  if (Drupal.settings.tableHeaderOffset) {
+    Drupal.overlayChild.prevTableHeaderOffset = Drupal.settings.tableHeaderOffset;
+  }
+  Drupal.settings.tableHeaderOffset = 'Drupal.overlayChild.tableHeaderOffset';
+};
+
+/**
+ * Callback for Drupal.settings.tableHeaderOffset.
+ */
+Drupal.overlayChild.tableHeaderOffset = function () {
+  var topOffset = Drupal.overlayChild.prevTableHeaderOffset ? eval(Drupal.overlayChild.prevTableHeaderOffset + '()') : 0;
+
+  return topOffset + parseInt($(document.body).css('marginTop'));
+};
+
+})(jQuery);
+;
+(function($,window){"$:nomunge";var undefined,aps=Array.prototype.slice,decode=decodeURIComponent,jq_param=$.param,jq_param_sorted,jq_param_fragment,jq_deparam,jq_deparam_fragment,jq_bbq=$.bbq=$.bbq||{},jq_bbq_pushState,jq_bbq_getState,jq_elemUrlAttr,special=$.event.special,str_hashchange="hashchange",str_querystring="querystring",str_fragment="fragment",str_elemUrlAttr="elemUrlAttr",str_href="href",str_src="src",re_params_querystring=/^.*\?|#.*$/g,re_params_fragment,re_fragment,re_no_escape,ajax_crawlable,fragment_prefix,elemUrlAttr_cache={};function is_string(arg){return typeof arg==="string"}function curry(func){var args=aps.call(arguments,1);return function(){return func.apply(this,args.concat(aps.call(arguments)))}}function get_fragment(url){return url.replace(re_fragment,"$2")}function get_querystring(url){return url.replace(/(?:^[^?#]*\?([^#]*).*$)?.*/,"$1")}function jq_param_sub(is_fragment,get_func,url,params,merge_mode){var result,qs,matches,url_params,hash;if(params!==undefined){matches=url.match(is_fragment?re_fragment:/^([^#?]*)\??([^#]*)(#?.*)/);hash=matches[3]||"";if(merge_mode===2&&is_string(params)){qs=params.replace(is_fragment?re_params_fragment:re_params_querystring,"")}else{url_params=jq_deparam(matches[2]);params=is_string(params)?jq_deparam[is_fragment?str_fragment:str_querystring](params):params;qs=merge_mode===2?params:merge_mode===1?$.extend({},params,url_params):$.extend({},url_params,params);qs=jq_param_sorted(qs);if(is_fragment){qs=qs.replace(re_no_escape,decode)}}result=matches[1]+(is_fragment?fragment_prefix:qs||!matches[1]?"?":"")+qs+hash}else{result=get_func(url!==undefined?url:location.href)}return result}jq_param[str_querystring]=curry(jq_param_sub,0,get_querystring);jq_param[str_fragment]=jq_param_fragment=curry(jq_param_sub,1,get_fragment);jq_param.sorted=jq_param_sorted=function(a,traditional){var arr=[],obj={};$.each(jq_param(a,traditional).split("&"),function(i,v){var key=v.replace(/(?:%5B|=).*$/,""),key_obj=obj[key];if(!key_obj){key_obj=obj[key]=[];arr.push(key)}key_obj.push(v)});return $.map(arr.sort(),function(v){return obj[v]}).join("&")};jq_param_fragment.noEscape=function(chars){chars=chars||"";var arr=$.map(chars.split(""),encodeURIComponent);re_no_escape=new RegExp(arr.join("|"),"g")};jq_param_fragment.noEscape(",/");jq_param_fragment.ajaxCrawlable=function(state){if(state!==undefined){if(state){re_params_fragment=/^.*(?:#!|#)/;re_fragment=/^([^#]*)(?:#!|#)?(.*)$/;fragment_prefix="#!"}else{re_params_fragment=/^.*#/;re_fragment=/^([^#]*)#?(.*)$/;fragment_prefix="#"}ajax_crawlable=!!state}return ajax_crawlable};jq_param_fragment.ajaxCrawlable(0);$.deparam=jq_deparam=function(params,coerce){var obj={},coerce_types={"true":!0,"false":!1,"null":null};$.each(params.replace(/\+/g," ").split("&"),function(j,v){var param=v.split("="),key=decode(param[0]),val,cur=obj,i=0,keys=key.split("]["),keys_last=keys.length-1;if(/\[/.test(keys[0])&&/\]$/.test(keys[keys_last])){keys[keys_last]=keys[keys_last].replace(/\]$/,"");keys=keys.shift().split("[").concat(keys);keys_last=keys.length-1}else{keys_last=0}if(param.length===2){val=decode(param[1]);if(coerce){val=val&&!isNaN(val)?+val:val==="undefined"?undefined:coerce_types[val]!==undefined?coerce_types[val]:val}if(keys_last){for(;i<=keys_last;i++){key=keys[i]===""?cur.length:keys[i];cur=cur[key]=i<keys_last?cur[key]||(keys[i+1]&&isNaN(keys[i+1])?{}:[]):val}}else{if($.isArray(obj[key])){obj[key].push(val)}else if(obj[key]!==undefined){obj[key]=[obj[key],val]}else{obj[key]=val}}}else if(key){obj[key]=coerce?undefined:""}});return obj};function jq_deparam_sub(is_fragment,url_or_params,coerce){if(url_or_params===undefined||typeof url_or_params==="boolean"){coerce=url_or_params;url_or_params=jq_param[is_fragment?str_fragment:str_querystring]()}else{url_or_params=is_string(url_or_params)?url_or_params.replace(is_fragment?re_params_fragment:re_params_querystring,""):url_or_params}return jq_deparam(url_or_params,coerce)}jq_deparam[str_querystring]=curry(jq_deparam_sub,0);jq_deparam[str_fragment]=jq_deparam_fragment=curry(jq_deparam_sub,1);$[str_elemUrlAttr]||($[str_elemUrlAttr]=function(obj){return $.extend(elemUrlAttr_cache,obj)})({a:str_href,base:str_href,iframe:str_src,img:str_src,input:str_src,form:"action",link:str_href,script:str_src});jq_elemUrlAttr=$[str_elemUrlAttr];function jq_fn_sub(mode,force_attr,params,merge_mode){if(!is_string(params)&&typeof params!=="object"){merge_mode=params;params=force_attr;force_attr=undefined}return this.each(function(){var that=$(this),attr=force_attr||jq_elemUrlAttr()[(this.nodeName||"").toLowerCase()]||"",url=attr&&that.attr(attr)||"";that.attr(attr,jq_param[mode](url,params,merge_mode))})}$.fn[str_querystring]=curry(jq_fn_sub,str_querystring);$.fn[str_fragment]=curry(jq_fn_sub,str_fragment);jq_bbq.pushState=jq_bbq_pushState=function(params,merge_mode){if(is_string(params)&&/^#/.test(params)&&merge_mode===undefined){merge_mode=2}var has_args=params!==undefined,url=jq_param_fragment(location.href,has_args?params:{},has_args?merge_mode:2);location.href=url};jq_bbq.getState=jq_bbq_getState=function(key,coerce){return key===undefined||typeof key==="boolean"?jq_deparam_fragment(key):jq_deparam_fragment(coerce)[key]};jq_bbq.removeState=function(arr){var state={};if(arr!==undefined){state=jq_bbq_getState();$.each($.isArray(arr)?arr:arguments,function(i,v){delete state[v]})}jq_bbq_pushState(state,2)};special[str_hashchange]=$.extend(special[str_hashchange],{add:function(handleObj){var old_handler;function new_handler(e){var hash=e[str_fragment]=jq_param_fragment();e.getState=function(key,coerce){return key===undefined||typeof key==="boolean"?jq_deparam(hash,key):jq_deparam(hash,coerce)[key]};old_handler.apply(this,arguments)}if($.isFunction(handleObj)){old_handler=handleObj;return new_handler}else{old_handler=handleObj.handler;handleObj.handler=new_handler}}})})(jQuery,this);(function($,window,undefined){"$:nomunge";var str_hashchange="hashchange",doc=document,fake_onhashchange,special=$.event.special,doc_mode=doc.documentMode,supports_onhashchange="on"+str_hashchange in window&&(doc_mode===undefined||doc_mode>7);function get_fragment(url){url=url||location.href;return"#"+url.replace(/^[^#]*#?(.*)$/,"$1")}$.fn[str_hashchange]=function(fn){return fn?this.bind(str_hashchange,fn):this.trigger(str_hashchange)};$.fn[str_hashchange].delay=50;special[str_hashchange]=$.extend(special[str_hashchange],{setup:function(){if(supports_onhashchange){return false}$(fake_onhashchange.start)},teardown:function(){if(supports_onhashchange){return false}$(fake_onhashchange.stop)}});fake_onhashchange=function(){var self={},timeout_id,last_hash=get_fragment(),fn_retval=function(val){return val},history_set=fn_retval,history_get=fn_retval;self.start=function(){timeout_id||poll()};self.stop=function(){timeout_id&&clearTimeout(timeout_id);timeout_id=undefined};function poll(){var hash=get_fragment(),history_hash=history_get(last_hash);if(hash!==last_hash){history_set(last_hash=hash,history_hash);$(window).trigger(str_hashchange)}else if(history_hash!==last_hash){location.href=location.href.replace(/#.*/,"")+history_hash}timeout_id=setTimeout(poll,$.fn[str_hashchange].delay)}return self}()})(jQuery,this);;
+/*! jQuery UI - v1.10.2 - 2013-03-14
+* http://jqueryui.com
+* Copyright 2013 jQuery Foundation and other contributors; Licensed MIT */
+(function(t,e){function i(t,e,i){return[parseFloat(t[0])*(p.test(t[0])?e/100:1),parseFloat(t[1])*(p.test(t[1])?i/100:1)]}function s(e,i){return parseInt(t.css(e,i),10)||0}function n(e){var i=e[0];return 9===i.nodeType?{width:e.width(),height:e.height(),offset:{top:0,left:0}}:t.isWindow(i)?{width:e.width(),height:e.height(),offset:{top:e.scrollTop(),left:e.scrollLeft()}}:i.preventDefault?{width:0,height:0,offset:{top:i.pageY,left:i.pageX}}:{width:e.outerWidth(),height:e.outerHeight(),offset:e.offset()}}t.ui=t.ui||{};var a,o=Math.max,r=Math.abs,h=Math.round,l=/left|center|right/,c=/top|center|bottom/,u=/[\+\-]\d+(\.[\d]+)?%?/,d=/^\w+/,p=/%$/,f=t.fn.position;t.position={scrollbarWidth:function(){if(a!==e)return a;var i,s,n=t("<div style='display:block;width:50px;height:50px;overflow:hidden;'><div style='height:100px;width:auto;'></div></div>"),o=n.children()[0];return t("body").append(n),i=o.offsetWidth,n.css("overflow","scroll"),s=o.offsetWidth,i===s&&(s=n[0].clientWidth),n.remove(),a=i-s},getScrollInfo:function(e){var i=e.isWindow?"":e.element.css("overflow-x"),s=e.isWindow?"":e.element.css("overflow-y"),n="scroll"===i||"auto"===i&&e.width<e.element[0].scrollWidth,a="scroll"===s||"auto"===s&&e.height<e.element[0].scrollHeight;return{width:a?t.position.scrollbarWidth():0,height:n?t.position.scrollbarWidth():0}},getWithinInfo:function(e){var i=t(e||window),s=t.isWindow(i[0]);return{element:i,isWindow:s,offset:i.offset()||{left:0,top:0},scrollLeft:i.scrollLeft(),scrollTop:i.scrollTop(),width:s?i.width():i.outerWidth(),height:s?i.height():i.outerHeight()}}},t.fn.position=function(e){if(!e||!e.of)return f.apply(this,arguments);e=t.extend({},e);var a,p,m,g,v,_,b=t(e.of),y=t.position.getWithinInfo(e.within),w=t.position.getScrollInfo(y),x=(e.collision||"flip").split(" "),k={};return _=n(b),b[0].preventDefault&&(e.at="left top"),p=_.width,m=_.height,g=_.offset,v=t.extend({},g),t.each(["my","at"],function(){var t,i,s=(e[this]||"").split(" ");1===s.length&&(s=l.test(s[0])?s.concat(["center"]):c.test(s[0])?["center"].concat(s):["center","center"]),s[0]=l.test(s[0])?s[0]:"center",s[1]=c.test(s[1])?s[1]:"center",t=u.exec(s[0]),i=u.exec(s[1]),k[this]=[t?t[0]:0,i?i[0]:0],e[this]=[d.exec(s[0])[0],d.exec(s[1])[0]]}),1===x.length&&(x[1]=x[0]),"right"===e.at[0]?v.left+=p:"center"===e.at[0]&&(v.left+=p/2),"bottom"===e.at[1]?v.top+=m:"center"===e.at[1]&&(v.top+=m/2),a=i(k.at,p,m),v.left+=a[0],v.top+=a[1],this.each(function(){var n,l,c=t(this),u=c.outerWidth(),d=c.outerHeight(),f=s(this,"marginLeft"),_=s(this,"marginTop"),D=u+f+s(this,"marginRight")+w.width,T=d+_+s(this,"marginBottom")+w.height,C=t.extend({},v),M=i(k.my,c.outerWidth(),c.outerHeight());"right"===e.my[0]?C.left-=u:"center"===e.my[0]&&(C.left-=u/2),"bottom"===e.my[1]?C.top-=d:"center"===e.my[1]&&(C.top-=d/2),C.left+=M[0],C.top+=M[1],t.support.offsetFractions||(C.left=h(C.left),C.top=h(C.top)),n={marginLeft:f,marginTop:_},t.each(["left","top"],function(i,s){t.ui.position[x[i]]&&t.ui.position[x[i]][s](C,{targetWidth:p,targetHeight:m,elemWidth:u,elemHeight:d,collisionPosition:n,collisionWidth:D,collisionHeight:T,offset:[a[0]+M[0],a[1]+M[1]],my:e.my,at:e.at,within:y,elem:c})}),e.using&&(l=function(t){var i=g.left-C.left,s=i+p-u,n=g.top-C.top,a=n+m-d,h={target:{element:b,left:g.left,top:g.top,width:p,height:m},element:{element:c,left:C.left,top:C.top,width:u,height:d},horizontal:0>s?"left":i>0?"right":"center",vertical:0>a?"top":n>0?"bottom":"middle"};u>p&&p>r(i+s)&&(h.horizontal="center"),d>m&&m>r(n+a)&&(h.vertical="middle"),h.important=o(r(i),r(s))>o(r(n),r(a))?"horizontal":"vertical",e.using.call(this,t,h)}),c.offset(t.extend(C,{using:l}))})},t.ui.position={fit:{left:function(t,e){var i,s=e.within,n=s.isWindow?s.scrollLeft:s.offset.left,a=s.width,r=t.left-e.collisionPosition.marginLeft,h=n-r,l=r+e.collisionWidth-a-n;e.collisionWidth>a?h>0&&0>=l?(i=t.left+h+e.collisionWidth-a-n,t.left+=h-i):t.left=l>0&&0>=h?n:h>l?n+a-e.collisionWidth:n:h>0?t.left+=h:l>0?t.left-=l:t.left=o(t.left-r,t.left)},top:function(t,e){var i,s=e.within,n=s.isWindow?s.scrollTop:s.offset.top,a=e.within.height,r=t.top-e.collisionPosition.marginTop,h=n-r,l=r+e.collisionHeight-a-n;e.collisionHeight>a?h>0&&0>=l?(i=t.top+h+e.collisionHeight-a-n,t.top+=h-i):t.top=l>0&&0>=h?n:h>l?n+a-e.collisionHeight:n:h>0?t.top+=h:l>0?t.top-=l:t.top=o(t.top-r,t.top)}},flip:{left:function(t,e){var i,s,n=e.within,a=n.offset.left+n.scrollLeft,o=n.width,h=n.isWindow?n.scrollLeft:n.offset.left,l=t.left-e.collisionPosition.marginLeft,c=l-h,u=l+e.collisionWidth-o-h,d="left"===e.my[0]?-e.elemWidth:"right"===e.my[0]?e.elemWidth:0,p="left"===e.at[0]?e.targetWidth:"right"===e.at[0]?-e.targetWidth:0,f=-2*e.offset[0];0>c?(i=t.left+d+p+f+e.collisionWidth-o-a,(0>i||r(c)>i)&&(t.left+=d+p+f)):u>0&&(s=t.left-e.collisionPosition.marginLeft+d+p+f-h,(s>0||u>r(s))&&(t.left+=d+p+f))},top:function(t,e){var i,s,n=e.within,a=n.offset.top+n.scrollTop,o=n.height,h=n.isWindow?n.scrollTop:n.offset.top,l=t.top-e.collisionPosition.marginTop,c=l-h,u=l+e.collisionHeight-o-h,d="top"===e.my[1],p=d?-e.elemHeight:"bottom"===e.my[1]?e.elemHeight:0,f="top"===e.at[1]?e.targetHeight:"bottom"===e.at[1]?-e.targetHeight:0,m=-2*e.offset[1];0>c?(s=t.top+p+f+m+e.collisionHeight-o-a,t.top+p+f+m>c&&(0>s||r(c)>s)&&(t.top+=p+f+m)):u>0&&(i=t.top-e.collisionPosition.marginTop+p+f+m-h,t.top+p+f+m>u&&(i>0||u>r(i))&&(t.top+=p+f+m))}},flipfit:{left:function(){t.ui.position.flip.left.apply(this,arguments),t.ui.position.fit.left.apply(this,arguments)},top:function(){t.ui.position.flip.top.apply(this,arguments),t.ui.position.fit.top.apply(this,arguments)}}},function(){var e,i,s,n,a,o=document.getElementsByTagName("body")[0],r=document.createElement("div");e=document.createElement(o?"div":"body"),s={visibility:"hidden",width:0,height:0,border:0,margin:0,background:"none"},o&&t.extend(s,{position:"absolute",left:"-1000px",top:"-1000px"});for(a in s)e.style[a]=s[a];e.appendChild(r),i=o||document.documentElement,i.insertBefore(e,i.firstChild),r.style.cssText="position: absolute; left: 10.7432222px;",n=t(r).offset().left,t.support.offsetFractions=n>10&&11>n,e.innerHTML="",i.removeChild(e)}()})(jQuery);;
