@@ -1446,6 +1446,7 @@ body.page-artist .panel-2col-stacked .panel-col-last {
 }
 #views-exposed-form-video-listing-bottom-slider-panel-pane-1 .form-item {
     margin: 5px 0;
+    text-align: center;
 }
 #views-exposed-form-video-listing-bottom-slider-panel-pane-1 .form-item a {
     font-size: 14px;
