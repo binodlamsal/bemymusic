@@ -30,24 +30,27 @@ function bemy_menu(){
 function custom_test(){
    $node = node_load(70);
    if($node->type=='digital_license_product'){
-    if($node->field_digital_license_product_so)
-        foreach($node->field_digital_license_product_so['und'] as $file){
-            $file_path = 'sites/default/files/'.$file['filename'];
-            echo $file_path;
-            echo  drupal_realpath(file_load($file['fid'])->uri);
-            echo ("\r\n");
-            echo '</br>';
-            echo 'test';
-        }
-   }
-   echo '<pre>';
-   print_r($node);die;
+        if($node->field_digital_license_product_so){
+            foreach($node->field_digital_license_product_so['und'] as $file){
+                echo file_load($file['fid'])->uri . "\r\n";
+            }
+       }
+    }
+   // $commerce_order->order_number
+    $args = array(
+    ':order_id' => 48,
+    );
 
+    $product_ids = db_query("SELECT p.commerce_product_product_id 
+       FROM {commerce_line_item} li 
+       JOIN {field_data_commerce_product} p ON (p.entity_id = li.line_item_id) 
+       WHERE li.order_id = :order_id AND li.type = 'product'", $args)->fetchCol();
+    var_dump($product_ids);die;
 }
 
 /** * Implements hook_form_alter(). */
 function bemy_form_alter(&$form, &$form_state, $form_id) {
-
+    /*
     //For already bought products by user
     $get_songs_list = views_get_view_result('product_lists_of_user','admin_page');
     $bought_songs_arr = array();
@@ -71,6 +74,6 @@ function bemy_form_alter(&$form, &$form_state, $form_id) {
             $form['submit']['#disabled'] = TRUE;
             $form['submit']['#suffix'] = t('(you already bought this product)');
         }
-    }
+    }*/
 }
 ?>
