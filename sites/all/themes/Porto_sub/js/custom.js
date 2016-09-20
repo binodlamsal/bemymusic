@@ -1,5 +1,13 @@
 jQuery(document).ready(function($){
 
+   $(window).load(function() {
+            $('.video-page-exposed-filter-right').parent().parent().addClass('cus-last-exposed');
+            $('.video-page-bottom-slider-first').parent().parent().addClass('cus-first-slider');
+            $('.cus-last-exposed').each(function () {
+            $(this).insertBefore($(this).prev('.cus-first-slider'));
+            });
+         });
+
       $(window).load(function() {
       
 

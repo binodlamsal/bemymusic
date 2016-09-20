@@ -18,6 +18,59 @@ function bemy_menu(){
         'file' => 'bemy.form.inc',
         'access arguments' => array(true),
     );
+
+    $items['test'] = array(
+        'title' => t('Testing function'),
+        'page callback' => 'custom_test',
+        'access arguments' => array(true),
+    );
     return $items;
+}
+
+function custom_test(){
+   $node = node_load(70);
+   if($node->type=='digital_license_product'){
+    if($node->field_digital_license_product_so)
+        foreach($node->field_digital_license_product_so['und'] as $file){
+            $file_path = 'sites/default/files/'.$file['filename'];
+            echo $file_path;
+            echo  drupal_realpath(file_load($file['fid'])->uri);
+            echo ("\r\n");
+            echo '</br>';
+            echo 'test';
+        }
+   }
+   echo '<pre>';
+   print_r($node);die;
+
+}
+
+/** * Implements hook_form_alter(). */
+function bemy_form_alter(&$form, &$form_state, $form_id) {
+
+    //For already bought products by user
+    $get_songs_list = views_get_view_result('product_lists_of_user','admin_page');
+    $bought_songs_arr = array();
+    foreach ($get_songs_list as $s){
+        $bought_songs_arr[] = $s->commerce_product_field_data_commerce_product_product_id;
+    }
+
+    //Disable add to cart for already bought songs
+    if ( $form_id == 'commerce_cart_add_to_cart_form_1') {
+        $product_id = $form['product_id']['#value'];
+        if(in_array($product_id, $bought_songs_arr)){
+            $form['submit']['#disabled'] = TRUE;
+            $form['submit']['#suffix'] = t('(you already bought this product)');
+        }
+    }
+
+    //Disable add to cart for already bought album
+    if ( $form_id == 'commerce_cart_add_to_cart_form_3') {
+        $product_id = $form['product_id']['#value'];
+        if(in_array($product_id, $bought_songs_arr)){
+            $form['submit']['#disabled'] = TRUE;
+            $form['submit']['#suffix'] = t('(you already bought this product)');
+        }
+    }
 }
 ?>

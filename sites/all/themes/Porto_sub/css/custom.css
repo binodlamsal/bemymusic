@@ -42,7 +42,7 @@ span.sf-depth-1.menuparent.nolink {
     font-size: 13px;
 }
 li.menu-419.first {
-    padding: 12px 15px;
+    /*padding: 12px 15px;*/
     color: #FFF;
 }
 .page-video .panel-panel.panel-col-last .video-page-ads-block img {
@@ -143,8 +143,8 @@ div#block-views-music-album-features-block-2{
     color: #d9096b;
     /* padding: 0 5px; */
     text-align: left;
-    width: 153px;
-    margin-right: 3px;
+    width: 100%;
+    margin-right: 0px;
 }
 .custom-cart-menu{
     clear: both;
@@ -768,7 +768,7 @@ body.front #views-slideshow-bxslider-images-2 .bxslider-views-slideshow-main-fra
 .node-type-email-for-download .music-text-header .music-text:before {
     position: absolute;
     
-    right: 47.29%;
+    right: 50%;
     content: "";
     display: block;
     width: 0;
@@ -776,6 +776,7 @@ body.front #views-slideshow-bxslider-images-2 .bxslider-views-slideshow-main-fra
     border-top: 65px solid transparent;
     border-bottom: 50px solid transparent;
     border-left: 50px solid #ffffff;
+    margin-right: -50px;
 }
 .node-type-artist-page audio {
     width: 50px;
@@ -801,6 +802,39 @@ body.front #views-slideshow-bxslider-images-2 .bxslider-views-slideshow-main-fra
 }
 div#block-webform-client-block-59 {
     padding-top: 30px;
+}
+.front .player-ui .minplayer-default.fullscreen .minplayer-default-controls{
+    padding: 0px !important;
+}
+.front .player-ui .minplayer-default.fullscreen .minplayer-default-fullscreen{
+    bottom: 7px !important;
+}
+.front .player-ui .minplayer-default.fullscreen .minplayer-default-volume{
+    bottom: 3px !important;
+}
+#block-block-5 li.menu-419.first {
+    padding: 0px;
+}
+.page-checkout .checkout-buttons input#edit-cancel {
+    color: #ffffff;
+    margin-left: 10px;
+    padding: 10px 15px !important;
+}
+.page-checkout .checkout-buttons input#edit-back {
+    color: #ffffff;
+    margin-left: 10px;
+    padding: 10px 15px !important;
+}
+.page-cart #views-form-commerce-cart-form-default .views-field-edit-delete input.delete-line-item {
+    margin-top: -10px;
+    color: #ffffff;
+    padding: 10px 15px !important;
+    font-size: 16px;
+}
+.cus-page-title {
+    padding-bottom: 20px;
+    font-size: 20px;
+    padding-left: 5px;
 }
 /* end of sep 12 changes */
 .page-merch-listing-page .music-text-header .merch-text:before {
@@ -832,6 +866,7 @@ div#block-webform-client-block-59 {
 body:not(.front):not(.page-artist):not(.page-video) .content.full {
     padding: 30px 0;
 }
+
 #sidebar-left .views-exposed-form .views-exposed-widget,
 #sidebar-left #edit-field-music-genre-tid-wrapper {
     padding: 0 0;
@@ -1564,11 +1599,11 @@ html .btn:focus {
         float: none;
     }
     #header .header-body > div:first-of-type {
-        width: 15%;
+        width: 10%;
     }
     #header .header-body > div:last-of-type {
         margin-top: 0 !important;
-        width: 85%;
+        width: 90%;
     }
    #header .header-body .header-row .header-column-valign-top {
         display: none;
@@ -1590,7 +1625,7 @@ html .btn:focus {
         margin-left: -15px; */
     }
     .nav-main ul#superfish-1 {
-        width: 55% !important;
+        width: 50% !important;
     }
     .nav-main ul#mainMenu {
         margin-top: 0;
@@ -2029,7 +2064,18 @@ html .btn:focus {
     }
 
 }
-
+@media (min-width: 768px) and (max-width: 991px){
+    #footer .container .row > div:nth-last-of-type(2) {
+        width: 672px !important;
+    }
+    #block-block-5 ul.nav.navbar-nav{
+        float: right !important;
+        margin-right: 15% !important;
+    }
+    #footer .col-md-4 {
+        clear: both !important;
+    }
+}
 @media (min-width: 481px) and (max-width: 767px) {
     
 }
@@ -2047,6 +2093,6 @@ html .btn:focus {
     }
     #block-block-5 ul.nav.navbar-nav{
         float: right;
-        margin-right: 10%;
+        margin-right: 15%;
     }
 }
